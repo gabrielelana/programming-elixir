@@ -5,8 +5,8 @@
 ExUnit.start
 
 defmodule Ch05.Test do
-  import ExUnit.CaptureIO
   use ExUnit.Case
+  import ExUnit.CaptureIO
 
   test "map with & notation" do
     assert [3,4,5,6] === Enum.map([1,2,3,4], &(&1 + 2))
