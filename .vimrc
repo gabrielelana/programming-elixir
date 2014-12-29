@@ -6,4 +6,4 @@ let g:syntastic_elixir_checkers = ['elixir']
 let g:syntastic_enable_elixir_checker = 1
 let g:syntastic_mode_map = {'mode': 'passive', 'active_filetypes': ['elixir']}
 
-" nnoremap <silent> <Leader>r :exec '!elixir ' . expand('%p') <CR>
+nnoremap <silent> <Leader>r :exec '!elixir ' . expand('%p') <CR>
