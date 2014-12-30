@@ -37,6 +37,26 @@ defmodule Programming.Elixir do
         filter(t, fun)
       end
     end
+
+    @doc """
+    Splits the enumerable into two collections, leaving count elements in the
+    first one. If count is a negative number, it starts counting from the back
+    to the beginning of the collection.
+    """
+    @spec split(Enumberable.t, integer) :: {list, list}
+    def split(collection, n) when n < 0, do: split(collection, max(0, count(collection) + n))
+    def split(collection, n), do: split(collection, n, [])
+
+    defp split(collection, 0, l), do: {reverse(l), collection}
+    defp split([], _, l), do: split([], 0, l)
+    defp split([h|t], n, l), do: split(t, n - 1, [h|l])
+
+    def count([]), do: 0
+    def count([_|t]), do: 1 + count(t)
+
+    def reverse(l), do: reverse(l, [])
+    def reverse([], acc), do: acc
+    def reverse([h|t], acc), do: reverse(t, [h|acc])
   end
 
   ExUnit.start
@@ -44,17 +64,25 @@ defmodule Programming.Elixir do
   defmodule Test do
     use ExUnit.Case
     import ExUnit.CaptureIO
+    import Integer
 
-    test "Enum.all?/2" do
-      assert true === Enum.all?([])
-      assert true === Enum.all?([true])
-      assert false === Enum.all?([false])
-      assert false === Enum.all?([true, false])
-      assert false === Enum.all?([false, true])
+    test "Enum.split/2" do
+      assert {[], []} === Enum.split([], 0)
+      assert {[], []} === Enum.split([], 1)
+      assert {[1], []} === Enum.split([1], 1)
+      assert {[], [1]} === Enum.split([1], 0)
+      assert {[1,2,3], []} === Enum.split([1,2,3], 3)
+      assert {[1,2,3], []} === Enum.split([1,2,3], 10)
+      assert {[1,2], [3]} === Enum.split([1,2,3], -1)
+      assert {[1], [2,3]} === Enum.split([1,2,3], -2)
+      assert {[], [1,2,3]} === Enum.split([1,2,3], -3)
+      assert {[], [1,2,3]} === Enum.split([1,2,3], -10)
+    end
 
-      import Integer
-      assert true === Enum.all?([1,3,5], &Integer.is_odd/1)
-      assert false === Enum.all?([1,2,5], &Integer.is_odd/1)
+    test "Enum.filter/2" do
+      assert [] === Enum.filter([], &(&1))
+      assert [1,3,5] === Enum.filter([1,3,5], &is_odd/1)
+      assert [1,5] === Enum.filter([1,2,5], &is_odd/1)
     end
 
     test "Enum.each/1" do
@@ -69,11 +97,15 @@ defmodule Programming.Elixir do
       """
     end
 
-    test "Enum.filter/2" do
-      import Integer
-      assert [] === Enum.filter([], &(&1))
-      assert [1,3,5] === Enum.filter([1,3,5], &Integer.is_odd/1)
-      assert [1,5] === Enum.filter([1,2,5], &Integer.is_odd/1)
+    test "Enum.all?/2" do
+      assert true === Enum.all?([])
+      assert true === Enum.all?([true])
+      assert false === Enum.all?([false])
+      assert false === Enum.all?([true, false])
+      assert false === Enum.all?([false, true])
+
+      assert true === Enum.all?([1,3,5], &is_odd/1)
+      assert false === Enum.all?([1,2,5], &is_odd/1)
     end
   end
 end
