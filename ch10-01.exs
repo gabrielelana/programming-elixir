@@ -24,6 +24,19 @@ defmodule Programming.Elixir do
       fun.(h)
       each(t, fun)
     end
+
+    @doc """
+    Filters the collection, i.e. returns only those elements for which fun returns true.
+    """
+    @spec filter(Enumberable.t, (any -> boolean)) :: list
+    def filter([], _), do: []
+    def filter([h|t], fun) do
+      if fun.(h) do
+        [h|filter(t, fun)]
+      else
+        filter(t, fun)
+      end
+    end
   end
 
   ExUnit.start
@@ -54,6 +67,13 @@ defmodule Programming.Elixir do
       2
       3
       """
+    end
+
+    test "Enum.filter/2" do
+      import Integer
+      assert [] === Enum.filter([], &(&1))
+      assert [1,3,5] === Enum.filter([1,3,5], &Integer.is_odd/1)
+      assert [1,5] === Enum.filter([1,2,5], &Integer.is_odd/1)
     end
   end
 end
