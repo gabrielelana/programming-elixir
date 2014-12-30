@@ -15,12 +15,22 @@ defmodule Programming.Elixir do
     def all?([], _), do: true
     def all?([h|t], fun), do: fun.(h) and all?(t, fun)
 
+    @doc """
+    Invokes the given fun for each item in the collection. Returns :ok.
+    """
+    @spec each(Enumerable.t, (any -> any)) :: :ok
+    def each([], _), do: :ok
+    def each([h|t], fun) do
+      fun.(h)
+      each(t, fun)
+    end
   end
 
   ExUnit.start
 
   defmodule Test do
     use ExUnit.Case
+    import ExUnit.CaptureIO
 
     test "Enum.all?/2" do
       assert true === Enum.all?([])
@@ -32,6 +42,18 @@ defmodule Programming.Elixir do
       import Integer
       assert true === Enum.all?([1,3,5], &Integer.is_odd/1)
       assert false === Enum.all?([1,2,5], &Integer.is_odd/1)
+    end
+
+    test "Enum.each/1" do
+      assert :ok === Enum.each([], fn x -> x end)
+      assert :ok === Enum.each([1,2,3], fn x -> x end)
+      assert capture_io(
+        fn -> Enum.each([1,2,3], &IO.puts/1) end
+      ) === """
+      1
+      2
+      3
+      """
     end
   end
 end
