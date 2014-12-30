@@ -1,11 +1,12 @@
-# An Elixir single-quoted string is actually a list of individual character
-# codes. Write a caesar(list, n) function that adds n to each list element,
-# wrapping if the addition results in a character greater than z.
+# Write a max(list) that returns the element with the maximum value in the list.
+# (This is slightly trickier than it sounds.)
 
 defmodule MyList do
 
-  def caesar(l, shift) do
-    reduce(l, '', fn(c, encoded) -> encoded ++ [?a + rem(c - ?a + shift, ?z - ?a + 1)] end)
+  def mapsum(l, f), do: reduce(l, 0, fn(value, acc) -> acc + f.(value) end)
+
+  def max(l) do
+    reduce(l, &Kernel.max(&1, &2))
   end
 
   def reduce([], _), do: raise "Empty list cannot be reduced without an initial value"
@@ -20,7 +21,10 @@ ExUnit.start
 defmodule Ch07.Test do
   use ExUnit.Case
 
-  test "MyList.caesar/2" do
-    assert 'elixir' === MyList.caesar('ryvkve', 13)
+  test "MyList.max/1" do
+    assert 3 === MyList.max [1, 2, 3]
+    assert -3 === MyList.max [-10, -20, -3]
+    assert 0 === MyList.max [0, -1, -2, -3]
+    assert_raise RuntimeError, fn -> MyList.max [] end
   end
 end

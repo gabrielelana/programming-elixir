@@ -1,23 +1,18 @@
-# Write a mapsum function that takes a list and a function. It applies the
-# function to each element of the list and then sums the result, so
-#
-# iex> MyList.mapsum [1, 2, 3], &(&1 * &1)
-# 14
+# I defined our sum function to carry a partial total as a second parameter so I
+# could illustrate how to use accumulators to build values. The sum function can
+# also be written without an accumulator. Can you do it?
 
 defmodule MyList do
-
-  def mapsum(l, f), do: reduce(l, 0, fn(value, acc) -> acc + f.(value) end)
-
-  def reduce([], value, _), do: value
-  def reduce([h|t], value, f), do: reduce(t, f.(h, value), f)
+  def sum([]), do: 0
+  def sum([h|t]), do: h + sum(t)
 end
 
 ExUnit.start
 
-defmodule Ch07.Test do
+defmodule Ch07.Text do
   use ExUnit.Case
 
-  test "MyList.mapsum/3" do
-    assert 14 === MyList.mapsum [1, 2, 3], &(&1 * &1)
+  test "Math.sum/1" do
+    assert 55 === MyList.sum([1,2,3,4,5,6,7,8,9,10])
   end
 end
