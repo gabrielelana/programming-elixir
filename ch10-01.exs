@@ -51,12 +51,33 @@ defmodule Programming.Elixir do
     defp split([], _, l), do: split([], 0, l)
     defp split([h|t], n, l), do: split(t, n - 1, [h|l])
 
-    def count([]), do: 0
-    def count([_|t]), do: 1 + count(t)
+    @doc """
+    Takes the first count items from the collection.
 
-    def reverse(l), do: reverse(l, [])
-    def reverse([], acc), do: acc
-    def reverse([h|t], acc), do: reverse(t, [h|acc])
+    If a negative count is given, the last count values will be taken. For
+    such, the collection is fully enumerated keeping up to 2 * count elements
+    in memory. Once the end of the collection is reached, the last count
+    elements are returned.
+    """
+    @spec take(Enumerable.t, integer) :: list
+    def take(collection, n) when n < 0, do: skip(collection, max(0, count(collection) + n))
+    def take(collection, n), do: take(collection, n, [])
+
+    defp take(_, 0, taken), do: reverse(taken)
+    defp take([], _, taken), do: take([], 0, taken)
+    defp take([h|t], n, taken), do: take(t, n - 1, [h|taken])
+
+    defp skip(rest, 0), do: rest
+    defp skip([], _), do: []
+    defp skip([_|t], n), do: skip(t, n - 1)
+
+
+    defp count([]), do: 0
+    defp count([_|t]), do: 1 + count(t)
+
+    defp reverse(l), do: reverse(l, [])
+    defp reverse([], reversed), do: reversed
+    defp reverse([h|t], reversed), do: reverse(t, [h|reversed])
   end
 
   ExUnit.start
@@ -65,6 +86,19 @@ defmodule Programming.Elixir do
     use ExUnit.Case
     import ExUnit.CaptureIO
     import Integer
+
+    test "Enum.take/2" do
+      assert [] === Enum.take([], 0)
+      assert [] === Enum.take([], 1)
+      assert [1] === Enum.take([1], 1)
+      assert [] === Enum.take([1], 0)
+      assert [1,2,3] === Enum.take([1,2,3], 3)
+      assert [1,2,3] === Enum.take([1,2,3], 10)
+      assert [3] === Enum.take([1,2,3], -1)
+      assert [2,3] === Enum.take([1,2,3], -2)
+      assert [1,2,3] === Enum.take([1,2,3], -3)
+      assert [1,2,3] === Enum.take([1,2,3], -10)
+    end
 
     test "Enum.split/2" do
       assert {[], []} === Enum.split([], 0)
