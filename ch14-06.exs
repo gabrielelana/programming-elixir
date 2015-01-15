@@ -1,5 +1,4 @@
-# Do the same as 14-03, but have the child raise an exception. What difference
-# do you see in the tracing?
+# Do the same as 14-04, but use spawn_monitor
 
 defmodule Programming.Elixir do
   defmodule CallMeIfYouDie do
@@ -10,8 +9,7 @@ defmodule Programming.Elixir do
     end
 
     def start do
-      Process.flag(:trap_exit, true)
-      spawn_link(__MODULE__, :child, [])
+      spawn_monitor(__MODULE__, :child, [])
       sleep 500
       flush
     end
@@ -31,6 +29,8 @@ defmodule Programming.Elixir do
   CallMeIfYouDie.start
 
   # receives
-  # > Received: {:EXIT, #PID<0.55.0>, {%RuntimeError{message: "oops"}, [{Programming.Elixir.CallMeIfYouDie, :child, 0, [file: 'ch14-04.exs', line: 9]}]}}
+  # > Received: {:DOWN, #Reference<0.0.0.128>, :process, #PID<0.55.0>, {%RuntimeError{message: "oops"}, [{Programming.Elixir.CallMeIfYouDie, :child, 0, [file: 'ch14-06.exs', line: 8]}]}}
 
+  # instead of
+  # > Received: {:EXIT, #PID<0.55.0>, {:undef, [{:oops, :exception, [[]], []}, {Programming.Elixir.CallMeIfYouDie, :child, 0, [file: 'ch14-04.exs', line: 9]}]}}
 end
