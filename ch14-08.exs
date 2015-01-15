@@ -14,6 +14,10 @@ defmodule Programming.Elixir do
       end
     end
 
+    def of(fib, n, from) do
+      send fib, {:fib, n, from}
+    end
+
     defp calculate(0), do: 0
     defp calculate(1), do: 1
     defp calculate(n), do: calculate(n-1) + calculate(n-2)
@@ -21,37 +25,37 @@ defmodule Programming.Elixir do
 
 
   defmodule Scheduler do
-    def run(workers, module, function, queue) do
+    def run(workers, module, init, ask, queue) do
       1..workers
-      |> Enum.map(fn _ -> spawn_link(module, function, [self]) end)
-      |> schedule(queue, [])
+      |> Enum.map(fn _ -> spawn_link(module, init, [self]) end)
+      |> schedule(queue, &(apply(module, ask, [&1, &2, self])), [])
     end
 
-    defp schedule(workers, queue, results) do
+    defp schedule(workers, queue, ask, results) do
       receive do
         {:ready, pid} when length(queue) == 0 ->
           send pid, :shutdown
           workers = List.delete(workers, pid)
           if length(workers) > 0 do
-            schedule(workers, queue, results)
+            schedule(workers, queue, ask, results)
           else
-            Enum.sort(results, fn {n1,_}, {n2,_} -> n1 <= n2 end)
+            results
           end
 
         {:ready, pid} ->
-          [n | tail] = queue
-          send pid, {:fib, n, self}
-          schedule(workers, tail, results)
+          [question | tail] = queue
+          ask.(pid, question)
+          schedule(workers, tail, ask, results)
 
         {:answer, n, result, _pid} ->
-          schedule(workers, queue, [{n, result}|results])
+          schedule(workers, queue, ask, [{n, result}|results])
       end
     end
   end
 
   questions = [37, 37, 37, 37, 37, 37]
   Enum.each 1..10, fn workers ->
-    {time, result} = :timer.tc(Scheduler, :run, [workers, Fibonacci, :init, questions])
+    {time, result} = :timer.tc(Scheduler, :run, [workers, Fibonacci, :init, :of, questions])
 
     if workers == 1 do
       IO.puts inspect result
