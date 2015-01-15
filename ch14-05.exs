@@ -1,8 +1,4 @@
-# Use spawn_link to start a process, and have that process send a message to the
-# parent and then exit immediately. Meanwhile, sleep for 500 ms in the parent,
-# then receive as many messages as are waiting. Trace what you receive. Does it
-# matter that you weren’t waiting for the notification from the child when it
-# exited?
+# Do the same as 14-03, but use spawn_monitor
 
 defmodule Programming.Elixir do
   defmodule CallMeIfYouDie do
@@ -13,8 +9,7 @@ defmodule Programming.Elixir do
     end
 
     def start do
-      Process.flag(:trap_exit, true)
-      spawn_link(__MODULE__, :child, [self])
+      spawn_monitor(__MODULE__, :child, [self])
       sleep 500
       flush
     end
@@ -33,6 +28,9 @@ defmodule Programming.Elixir do
   CallMeIfYouDie.start
 
   # receives
+  # > Received: :ok
+  # > Received: {:DOWN, #Reference<0.0.0.126>, :process, #PID<0.55.0>, :normal}
+  # instead of
   # > Received: :ok
   # > Received: {:EXIT, #PID<0.55.0>, :normal}
 
