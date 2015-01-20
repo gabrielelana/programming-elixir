@@ -25,7 +25,7 @@ defmodule Programming.Elixir do
     end
     def handle_call(:pop, _from, []) do
       # System.halt(1)
-      {:stop, :normal, []}
+      {:stop, :normal, :ok, []}
       # {:reply, {:error, :empty}, []}
     end
 
